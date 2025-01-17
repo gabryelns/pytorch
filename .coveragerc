@@ -1,15 +1,8 @@
 [run]
-plugins =
+ plugins =
     coverage_plugins.jit_plugin
 omit =
-    */tmp*
-    */Temp/*
-    */usr/local/lib*
-    *test/*
-
-[report]
-omit =
-    */tmp*
-    */Temp/*
-    */usr/local/lib*
-    *test/*
+    /tmp
+    /Temp/
+    /usr/local/lib
+    test/

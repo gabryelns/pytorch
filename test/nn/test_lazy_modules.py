@@ -1,7 +1,9 @@
 # Owner(s): ["module: nn"]
 import pickle
 import unittest
-
+import unittest
+from torch.nn.modules.conv import _LazyConvXdMixin
+from torch.nn.parameter import UninitializedParameter
 import torch
 import torch.nn as nn
 from torch.nn import Buffer, Parameter
@@ -839,6 +841,44 @@ class TestLazyModules(TestCase):
         with self.assertRaisesRegex(ValueError, "uninitialized parameter"):
             param + param
 
+class TestLazyConvXdMixin(unittest.TestCase):
+    def setUp(self):
+        self.module = _LazyConvXdMixin()
+
+    def test_initialize_parameters_success(self):
+        self.module.in_channels = 16
+        self.module.out_channels = 32
+        self.module.groups = 4
+        self.module.weight = UninitializedParameter()
+        self.module.bias = None
+        self.module.initialize_parameters(input=None)
+        self.assertIsNotNone(self.module.weight)
+
+    def test_initialize_parameters_division_error(self):
+        self.module.in_channels = 15
+        self.module.out_channels = 30
+        self.module.groups = 4
+        with self.assertRaises(ValueError):
+            self.module.initialize_parameters(input=None)
+
+    def test_initialize_parameters_transposed(self):
+        self.module.in_channels = 16
+        self.module.out_channels = 32
+        self.module.groups = 4
+        self.module.transposed = True
+        self.module.weight = UninitializedParameter()
+        self.module.bias = None
+        self.module.initialize_parameters(input=None)
+        self.assertEqual(self.module.weight.shape, (16, 8, 3, 3))
+
+    def test_initialize_parameters_with_bias(self):
+        self.module.in_channels = 16
+        self.module.out_channels = 32
+        self.module.groups = 4
+        self.module.weight = UninitializedParameter()
+        self.module.bias = UninitializedParameter()
+        self.module.initialize_parameters(input=None)
+        self.assertIsNotNone(self.module.bias)
 
 if __name__ == "__main__":
-    run_tests()
+    unittest.main()
