@@ -881,4 +881,4 @@ class TestLazyConvXdMixin(unittest.TestCase):
         self.assertIsNotNone(self.module.bias)
 
 if __name__ == "__main__":
-    unittest.main()
+    run_tests.main()
